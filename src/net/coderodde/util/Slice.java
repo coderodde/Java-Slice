@@ -62,10 +62,14 @@ public class Slice<E> implements Iterable<E> {
                  final int fromIndex, 
                  final int toIndex) {
         checkArray(array);
-        checkFromAndToIndices(fromIndex, toIndex, array.length);
+        checkIndexForArray(array, fromIndex);
+        checkIndexForArray(array, toIndex);
         this.array = array;
         this.fromIndex = fromIndex;
-        this.size = toIndex - fromIndex;
+        
+        this.size = fromIndex <= toIndex ? 
+                    toIndex - fromIndex :
+                    array.length - fromIndex + toIndex + 1;
     }
     
     /**
@@ -411,51 +415,23 @@ public class Slice<E> implements Iterable<E> {
     }
     
     /**
-     * Checks the slice starting index.
+     * Checks that <code>index</code> is legal for an <code>array</code>.
      * 
-     * @param fromIndex   the starting (inclusive) index of a slice.
-     * @param arrayLength the length of an array.
+     * @param <E>   the actual array component type.
+     * @param array the array.
+     * @param index the index.
      */
-    private static void checkFromIndex(final int fromIndex, 
-                                       final int arrayLength) {
-        if (fromIndex < 0 || fromIndex >= arrayLength) {
+    private static <E> void checkIndexForArray(final E[] array,
+                                               final int index) {
+        if (index < 0) {
             throw new IllegalArgumentException(
-                    "Bad 'fromIndex': " + fromIndex + ", array length: " +
-                    arrayLength);
+                    "The index (" + index + ") may not be negative.");
         }
-    }
-    
-    /**
-     * Checks the ending (exclusive) index.
-     * 
-     * @param toIndex     the ending (exclusive) index of a slice.
-     * @param arrayLength the length of an array.
-     */
-    private static void checkToIndex(final int toIndex, final int arrayLength) {
-        if (toIndex < 0 || toIndex > arrayLength) {
-            throw new IllegalArgumentException(
-                    "Bad 'toIndex': " + toIndex + ", array length: " + 
-                    arrayLength);
-        }
-    }
-    
-    /**
-     * Checks both slice indices.
-     * 
-     * @param fromIndex   the starting (inclusive) index of a slice.
-     * @param toIndex     the ending (exclusive) index of a slice.
-     * @param arrayLength the length of an array.
-     */
-    private static void checkFromAndToIndices(final int fromIndex, 
-                                              final int toIndex,
-                                              final int arrayLength) {
-        checkFromIndex(fromIndex, arrayLength);
-        checkToIndex(toIndex, arrayLength);
         
-        if (fromIndex > toIndex) {
+        if (index > array.length) {
             throw new IllegalArgumentException(
-                    "'fromIndex' (" + fromIndex + ") is larger than " +
-                    "'toIndex' (" + toIndex + ").");
+                    "The index (" + index + ") is too large. Should be at " +
+                    "most " + array.length);
         }
     }
     

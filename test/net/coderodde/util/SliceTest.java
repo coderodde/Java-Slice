@@ -64,11 +64,6 @@ public class SliceTest {
         new Slice(array, 3, SIZE);
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testThrowsOnReversedIndices() {
-        new Slice(array, 4, 3);
-    }
-    
     @Test(expected = NullPointerException.class)
     public void testThrowsOnNullArray() {
         new Slice(null);
@@ -122,18 +117,59 @@ public class SliceTest {
 
     @Test
     public void testMoveLeft_int() {
+        Slice s = new Slice(array, 3, 6); // size 3
+        is(s, 3, 4, 5);
+        s.moveLeft(2);
+        is(s, 1, 2, 3);
     }
 
     @Test
     public void testMoveLeft_0args() {
+        Slice s = new Slice(array, 3, 6); // size 3
+        is(s, 3, 4, 5);
+        s.moveLeft();
+        is(s, 2, 3, 4);
+        s.moveLeft();
+        is(s, 1, 2, 3);
+        s.moveLeft();
+        is(s, 0, 1, 2);
+        s.moveLeft();
+        is(s, SIZE - 1, 0, 1);
+        s.moveLeft();
+        is(s, SIZE - 2, SIZE - 1, 0);
     }
 
     @Test
     public void testMoveRight_int() {
+        Slice s = new Slice(array, 2, 6); // size 4
+        is(s, 2, 3, 4, 5);
+        s.moveRight(3);
+        is(s, 5, 6, 7, 8);
+        s.moveRight(2);
+        is(s, 7, 8, 9, 10);
+        
+        s = new Slice(array, SIZE - 2, 1); // size 4
     }
 
     @Test
     public void testMoveRight_0args() {
+        Slice s = new Slice(array, 2, 6);
+        is(s, 2, 3, 4, 5);
+        s.moveRight();
+        is(s, 3, 4, 5, 6);
+        s.moveRight();
+        is(s, 4, 5, 6, 7);
+        
+        s = new Slice(array, array.length - 3); // size 3
+        is(s, SIZE - 3, SIZE - 2, SIZE - 1);
+        s.moveRight();
+        is(s, SIZE - 2, SIZE - 1, 0);
+        s.moveRight();
+        is(s, SIZE - 1, 0, 1);
+        s.moveRight();
+        is(s, 0, 1, 2);
+        s.moveRight();
+        is(s, 1, 2, 3);
     }
 
     @Test
@@ -193,7 +229,7 @@ public class SliceTest {
         final Iterator<Integer> it = s.iterator();
         
         while (it.hasNext()) {
-            assertEquals(ints[index], it.next());
+            assertEquals(ints[index++], it.next());
         }
         
         assertFalse(it.hasNext());
