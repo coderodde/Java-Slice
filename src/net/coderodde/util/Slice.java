@@ -66,10 +66,10 @@ public class Slice<E> implements Iterable<E> {
         checkIndexForArray(array, toIndex);
         this.array = array;
         this.fromIndex = fromIndex;
-        
+        // 100 10 9
         this.size = fromIndex <= toIndex ? 
                     toIndex - fromIndex :
-                    array.length - fromIndex + toIndex + 1;
+                    array.length - fromIndex + toIndex;
     }
     
     /**
@@ -278,10 +278,10 @@ public class Slice<E> implements Iterable<E> {
             return;
         }
         
-        if (steps <= size() - steps) {
-            cycleImplLeft(steps);
+        if (actualSteps <= size() - actualSteps) {
+            cycleImplLeft(actualSteps);
         } else {
-            cycleImplRight(size() - steps);
+            cycleImplRight(size() - actualSteps);
         }
     }
     
@@ -310,10 +310,10 @@ public class Slice<E> implements Iterable<E> {
             return;
         }
         
-        if (steps <= size() - steps) {
-            cycleImplRight(steps);
+        if (actualSteps <= size() - actualSteps) {
+            cycleImplRight(actualSteps);
         } else {
-            cycleImplLeft(size() - steps);
+            cycleImplLeft(size() - actualSteps);
         }
     }
     
@@ -520,10 +520,10 @@ public class Slice<E> implements Iterable<E> {
      * @param args the command line arguments.
      */
     public static void main(final String... args) {
-        final Character[] array = new Character[26];
+        final Character[] array = new Character[10];
         
-        for (char c = 'A'; c <= 'Z'; ++c) {
-            array[c - 'A'] = c;
+        for (char c = '0'; c <= '9'; ++c) {
+            array[c - '0'] = c;
         }
         
         final Slice<Character> slice = new Slice<>(array);
@@ -621,6 +621,10 @@ public class Slice<E> implements Iterable<E> {
                     
                 break;
                     
+                case "rev":
+                    slice.reverse();
+                    break;
+                    
                 case "help":
                     printHelp();
                     break;
@@ -646,6 +650,7 @@ public class Slice<E> implements Iterable<E> {
                 "conback [N]  - Contract the back.\n" +
                 "lcycle [N]   - Cycle the slice to the left.\n" +
                 "rcycle [N]   - Cycle the slice to the right.\n" +
+                "rev          - Reverse the range covered by this slice.\n" +
                 "----------------------------------------------\n");
     }
 }
