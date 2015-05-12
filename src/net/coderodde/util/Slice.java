@@ -61,6 +61,7 @@ public class Slice<E> implements Iterable<E> {
     public Slice(final E[] array, 
                  final int fromIndex, 
                  final int toIndex) {
+        checkArray(array);
         checkFromAndToIndices(fromIndex, toIndex, array.length);
         this.array = array;
         this.fromIndex = fromIndex;
@@ -398,6 +399,18 @@ public class Slice<E> implements Iterable<E> {
     }
     
     /**
+     * Checks that the input array is not <code>null</code>.
+     * 
+     * @param <E>   the array component type.
+     * @param array the array.
+     */
+    private static <E> void checkArray(final E[] array) {
+        if (array == null) {
+            throw new NullPointerException("Input array is null.");
+        }
+    }
+    
+    /**
      * Checks the slice starting index.
      * 
      * @param fromIndex   the starting (inclusive) index of a slice.
@@ -459,7 +472,7 @@ public class Slice<E> implements Iterable<E> {
         }
         
         if (index < 0 || index >= size) {
-            throw new IllegalArgumentException(
+            throw new IndexOutOfBoundsException(
                     "The input index is invalid: " + index + ". Should be " +
                     "in range [0, " + (size - 1) + "].");
         }
