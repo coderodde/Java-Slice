@@ -147,141 +147,53 @@ public class Slice<E> implements Iterable<E> {
     }
 
     /**
-     * Moves this slice <code>steps</code> to the right. If the head of this
-     * slice, while moving to the left, leaves the beginning of the underlying
-     * array, it reappears at the right end of the array.
+     * Moves this slice. If <code>delta</code> is negative, moves this slice to 
+     * the left <code>-delta</code> steps. Otherwise, moves this slice 
+     * <code>delta</code> steps to the right. In any case, this slice may wrap
+     * around and reappear at the opposite and of the covered array.
      * 
-     * @param steps the amount of steps to move.
+     * @param delta the movement delta.
      */
-    public void moveLeft(final int steps) {
-        if (array.length == 0) {
-            return;
-        }
-
-        fromIndex -= steps % array.length;
-
-        if (fromIndex < 0) {
-            fromIndex += array.length;
+    public void move(int delta) {
+        if (delta < 0) {
+            moveLeft(-delta);
+        } else {
+            moveRight(delta);
         }
     }
+    
 
     /**
-     * Moves this slice one step to the left.
-     */
-    public void moveLeft() {
-        moveLeft(1);
-    }
-
-    /**
-     * Moves this slice <code>steps</code> amount of steps to the right. If the 
-     * tail of this slice, while moving to the right, leaves the tail of the
-     * underlying array, it reappears at the beginning of the array.
+     * Shifts the head of this slice. If <code>delta</code> is negative, expands
+     * the head of this slice <code>-delta</code> amount of array components.
      * 
-     * @param steps the amount of steps to move.
+     * @param delta the shift delta.
      */
-    public void moveRight(final int steps) {
-        if (array.length == 0) {
-            return;
-        }
-
-        fromIndex += steps % array.length;
-
-        if (fromIndex >= array.length) {
-            fromIndex -= array.length;
+    public void shiftHead(int delta) {
+        if (delta < 0) {
+            expandHead(-delta);
+        } else {
+            contractHead(delta);
         }
     }
+    
 
     /**
-     * Moves this slice one step to the right.
-     */
-    public void moveRight() {
-        moveRight(1);
-    }
-
-    /**
-     * Expands the front of this slice by at <code>amount</code> array
-     * components. This slice may "cycle" the same way as at motion to the left
-     * or right.
+     * Shifts the tail of this slice. If <code>delta</code> is negative, 
+     * this operations contracts the tail of this slice by <code>-delta<code> 
+     * array components. Otherwise, expands tail of this slice 
+     * <code>delta</code> array components.
      * 
-     * @param amount the expansion length.
+     * @param delta the shift delta.
      */
-    public void expandFront(final int amount) {
-        checkNotNegative(amount);
-        final int actualAmount = Math.min(amount, array.length - size());
-        fromIndex -= actualAmount;
-        size += actualAmount;
-
-        if (fromIndex < 0) {
-            fromIndex += array.length;
+    public void shiftTail(int delta) {
+        if (delta < 0) {
+            contractTail(-delta);
+        } else {
+            expandTail(delta);
         }
     }
-
-    /**
-     * Expands the front of this slice by one array component.
-     */
-    public void expandFront() {
-        expandFront(1);
-    }
-
-    /**
-     * Contracts the front of this slice by at <code>amount</code> array
-     * components.
-     * 
-     * @param amount the contraction length.
-     */
-    public void contractFront(final int amount) {
-        checkNotNegative(amount);
-        final int actualAmount = Math.min(amount, size());
-        fromIndex += actualAmount;
-        size -= actualAmount;
-
-        if (fromIndex >= array.length) {
-            fromIndex -= array.length;
-        }
-    }
-
-    /**
-     * Contracts the front of this slice by one array component.
-     */
-    public void contractFront() {
-        contractFront(1);
-    }
-
-    /**
-     * Expands the back of this slice by at <code>amount</code> array 
-     * components.
-     * 
-     * @param amount the expansion length.
-     */
-    public void expandBack(final int amount) {
-        checkNotNegative(amount);
-        size += Math.min(amount, array.length - size());
-    }
-
-    /**
-     * Expands the back of this slice by one array component.
-     */
-    public void expandBack() {
-        expandBack(1);
-    }
-
-    /**
-     * Contracts the back of this slice by <code>amount</code> array components.
-     * 
-     * @param amount the contraction length.
-     */
-    public void contractBack(final int amount) {
-        checkNotNegative(amount);
-        size -= Math.min(amount, size());
-    }
-
-    /**
-     * Contracts the back of this slice by one array component.
-     */
-    public void contractBack() {
-        contractBack(1);
-    }
-
+    
     /**
      * Reverses the array range covered by this slice.
      */
@@ -294,69 +206,20 @@ public class Slice<E> implements Iterable<E> {
     }
 
     /**
-     * Cycles the array range covered by this slice <code>steps</code> steps to
-     * the left.
+     * Rotates this slice. If <code>delta</code> is negative, rotates to the
+     * left <code>Math.abs(delta)</code> array components. Otherwise, rotates to 
+     * the right <code>delta</code> array components.
      * 
-     * @param steps the amount of steps to cycle.
+     * @param delta rotation delta.
      */
-    public void cycleLeft(final int steps) {
-        if (size() < 2) {
-            // Trivially cycled.
-            return;
-        }
-
-        final int actualSteps = steps % size();
-
-        if (actualSteps == 0) {
-            return;
-        }
-
-        if (actualSteps <= size() - actualSteps) {
-            cycleImplLeft(actualSteps);
+    public void rotate(int delta) {
+        if (delta < 0) {
+            rotateLeft(-delta);
         } else {
-            cycleImplRight(size() - actualSteps);
+            rotateRight(delta);
         }
     }
-
-    /**
-     * Cycles the array range covered by this slice one step to the leftt.
-     */
-    public void cycleLeft() {
-        cycleLeft(1);
-    }
-
-    /**
-     * Cycles the array range covered by this slice <code>steps</code> steps to
-     * the right.
-     * 
-     * @param steps the amount of steps to cycle.
-     */
-    public void cycleRight(final int steps) {
-        if (size() < 2) {
-            // Trivially cycled.
-            return;
-        }
-
-        final int actualSteps = steps % size();
-
-        if (actualSteps == 0) {
-            return;
-        }
-
-        if (actualSteps <= size() - actualSteps) {
-            cycleImplRight(actualSteps);
-        } else {
-            cycleImplLeft(size() - actualSteps);
-        }
-    }
-
-    /**
-     * Cycles the array range covered by this slice one step to the right.
-     */
-    public void cycleRight() {
-        cycleRight(1);
-    }
-
+    
     /**
      * Returns the iterator over this slice.
      * 
@@ -386,53 +249,6 @@ public class Slice<E> implements Iterable<E> {
         }
 
         return sb.toString();
-    }
-
-    /**
-     * Implements the rotation of a slice to the left.
-     * 
-     * @param steps the amount of steps.
-     */
-    private void cycleImplLeft(final int steps) {
-        final Object[] buffer = new Object[steps];
-
-        int index = 0;
-
-        // Load the buffer.
-        for (; index < steps; ++index) {
-            buffer[index] = get(index);
-        }
-
-        for (int j = 0; index < size; ++index, ++j) {
-            set(j, get(index));
-        }
-
-        index -= steps;
-
-        for (int j = 0; index < size; ++index, ++j) {
-            set(index, (E) buffer[j]);
-        }
-    }
-
-    /**
-     * Implements the rotation of a slice to the right.
-     * 
-     * @param steps the amount of steps.
-     */
-    private void cycleImplRight(final int steps) {
-        final Object[] buffer = new Object[steps];
-
-        for (int i = 0, j = size - steps; i < steps; ++i, ++j) {
-            buffer[i] = get(j);
-        }
-
-        for (int i = size - steps - 1; i >= 0; --i) {
-            set(i + steps, get(i));
-        }
-
-        for (int i = 0; i < buffer.length; ++i) {
-            set(i, (E) buffer[i]);
-        }
     }
 
     /**
@@ -487,6 +303,205 @@ public class Slice<E> implements Iterable<E> {
         }
     }
 
+    /**
+     * Expands the front of this slice by at <code>amount</code> array
+     * components. This slice may "cycle" the same way as at motion to the left
+     * or right.
+     * 
+     * @param amount the expansion length.
+     */
+    private void expandHead(final int amount) {
+        checkNotNegative(amount);
+        final int actualAmount = Math.min(amount, array.length - size());
+        fromIndex -= actualAmount;
+        size += actualAmount;
+
+        if (fromIndex < 0) {
+            fromIndex += array.length;
+        }
+    }
+
+    /**
+     * Contracts the front of this slice by at <code>amount</code> array
+     * components.
+     * 
+     * @param amount the contraction length.
+     */
+    private void contractHead(final int amount) {
+        checkNotNegative(amount);
+        final int actualAmount = Math.min(amount, size());
+        fromIndex += actualAmount;
+        size -= actualAmount;
+
+        if (fromIndex >= array.length) {
+            fromIndex -= array.length;
+        }
+    }
+    
+    /**
+     * Expands the back of this slice by at <code>amount</code> array 
+     * components.
+     * 
+     * @param amount the expansion length.
+     */
+    private void expandTail(final int amount) {
+        checkNotNegative(amount);
+        size += Math.min(amount, array.length - size());
+    }
+
+    /**
+     * Contracts the back of this slice by <code>amount</code> array components.
+     * 
+     * @param amount the contraction length.
+     */
+    private void contractTail(final int amount) {
+        checkNotNegative(amount);
+        size -= Math.min(amount, size());
+    }
+    
+    /**
+     * Moves this slice <code>steps</code> to the left. If the head of this
+     * slice, while moving to the left, leaves the beginning of the underlying
+     * array, it reappears at the right end of the array.
+     * 
+     * @param steps the amount of steps to move.
+     */
+    private void moveLeft(int steps) {
+        checkNotNegative(steps);
+        
+        if (array.length == 0) {
+            return;
+        }
+
+        fromIndex -= steps % array.length;
+
+        if (fromIndex < 0) {
+            fromIndex += array.length;
+        }
+    }
+
+    /**
+     * Moves this slice <code>steps</code> amount of steps to the right. If the 
+     * tail of this slice, while moving to the right, leaves the tail of the
+     * underlying array, it reappears at the beginning of the array.
+     * 
+     * @param steps the amount of steps to move.
+     */
+    private void moveRight(final int steps) {
+        checkNotNegative(steps);
+        
+        if (array.length == 0) {
+            return;
+        }
+
+        fromIndex += steps % array.length;
+
+        if (fromIndex >= array.length) {
+            fromIndex -= array.length;
+        }
+    }
+    
+    /**
+     * Cycles the array range covered by this slice <code>steps</code> steps to
+     * the left.
+     * 
+     * @param steps the amount of steps to cycle.
+     */
+    private void rotateLeft(int steps) {
+        if (size() < 2) {
+            // Trivially cycled.
+            return;
+        }
+
+        final int actualSteps = steps % size();
+
+        if (actualSteps == 0) {
+            return;
+        }
+
+        if (actualSteps <= size() - actualSteps) {
+            rotateLeftImpl(actualSteps);
+        } else {
+            rotateRightImpl(size() - actualSteps);
+        }
+    }
+
+    /**
+     * Cycles the array range covered by this slice <code>steps</code> steps to
+     * the right.
+     * 
+     * @param steps the amount of steps to cycle.
+     */
+    private void rotateRight(int steps) {
+        if (size() < 2) {
+            // Trivially cycled.
+            return;
+        }
+
+        final int actualSteps = steps % size();
+
+        if (actualSteps == 0) {
+            return;
+        }
+
+        if (actualSteps <= size() - actualSteps) {
+            rotateRightImpl(actualSteps);
+        } else {
+            rotateLeftImpl(size() - actualSteps);
+        }
+    }
+    
+    /**
+     * Implements the rotation of a slice to the left.
+     * 
+     * @param steps the amount of steps.
+     */
+    private void rotateLeftImpl(int steps) {
+        checkNotNegative(steps);
+        final Object[] buffer = new Object[steps];
+
+        int index = 0;
+
+        // Load the buffer.
+        for (; index < steps; ++index) {
+            buffer[index] = get(index);
+        }
+
+        // Rotate.
+        for (int j = 0; index < size; ++index, ++j) {
+            set(j, get(index));
+        }
+
+        index -= steps;
+
+        // Unload the buffer.
+        for (int j = 0; index < size; ++index, ++j) {
+            set(index, (E) buffer[j]);
+        }
+    }
+
+    /**
+     * Implements the rotation of a slice to the right.
+     * 
+     * @param steps the amount of steps.
+     */
+    private void rotateRightImpl(int steps) {
+        checkNotNegative(steps);
+        final Object[] buffer = new Object[steps];
+
+        for (int i = 0, j = size - steps; i < steps; ++i, ++j) {
+            buffer[i] = get(j);
+        }
+
+        for (int i = size - steps - 1; i >= 0; --i) {
+            set(i + steps, get(i));
+        }
+
+        for (int i = 0; i < buffer.length; ++i) {
+            set(i, (E) buffer[i]);
+        }
+    }
+    
     /**
      * Checks that <code>number</code> is not negative.
      * 
@@ -572,114 +587,106 @@ public class Slice<E> implements Iterable<E> {
             final String line = scanner.nextLine().trim().toLowerCase();
             final String[] parts = line.split("\\s+");
 
-            if (parts.length == 0) {
+            if (parts.length < 2) {
                 continue;
             }
-
-            switch (parts[0]) {
-                case "left":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.moveLeft(steps);
-                    } else {
-                        slice.moveLeft();
-                    }
-
-                break;
-
-                case "right":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.moveRight(steps);
-                    } else {
-                        slice.moveRight();
-                    }
-
-                break;
-
-                case "exfront":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.expandFront(steps);
-                    } else {
-                        slice.expandFront();
-                    }
-
-                break;
-
-                case "exback":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.expandBack(steps);
-                    } else {
-                        slice.expandBack();
-                    }
-
-                break;
-
-                case "confront":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.contractFront(steps);
-                    } else {
-                        slice.contractFront();
-                    }
-
-                break;
-
-                case "conback":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.contractBack(steps);
-                    } else {
-                        slice.contractBack();
-                    }
-
-                break;
-
-                case "lcycle":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.cycleLeft(steps);
-                    } else {
-                        slice.cycleLeft();
-                    }
-
-                break;
-
-                case "rcycle":
-                    if (parts.length > 1) {
-                        int steps = Integer.parseInt(parts[1]);
-                        slice.cycleRight(steps);
-                    } else {
-                        slice.cycleRight();
-                    }
-
-                break;
-
-                case "rev":
-                    slice.reverse();
-                    break;
-
-                case "help":
-                    printHelp();
-                    break;
-
-                case "quit":
-                    System.exit(0);
-                    break; // Just be sure for maintenance.
-                    
-                default:
-                    System.out.println("Unknown command \"" + line + "\"");
-                    break;
-            }
+            
+            exec(line, slice);
 
             System.out.println(slice);
         }
     }
 
+    private static void exec(String line, Slice<Character> slice) {
+        if (line.isEmpty()) {
+            return;
+        }
+        
+        String[] parts = line.split("\\s+");
+        final int len = parts.length;
+        
+        if (parts.length == 0) {
+            return;
+        }
+        
+        // Handle commands without arguments.
+        switch (parts[0]) {
+            case "rev":
+                slice.reverse();
+                break;
+                
+            case "help":
+                printHelp();
+                break;
+                
+            case "quit":
+                System.out.println("Bye!");
+                System.exit(0);
+        }
+        
+        if (parts[0].equals("set") && len < 3) {
+            System.out.println("\"set\" requires two arguments, but only " +
+                               (len - 1) + "received.");
+            return;
+        }
+        
+        if (len < 2) {
+            // Arguments not available.
+            System.out.println("Expecting an argument for command \"" + 
+                               parts[0] + "\"");
+            return;
+        }
+        
+        int argument;
+        int argument2 = 0;
+        
+        try {
+            argument = Integer.parseInt(parts[1]);
+            
+            if (parts[0].equals("set")) {
+                argument2 = Integer.parseInt(parts[2]);
+            }
+        } catch (NumberFormatException nfe) {
+            System.out.println("Argument is not an integer: " + parts[1]);
+            return;
+        }
+        
+        switch (parts[0]) {
+            case "move":
+                slice.move(argument);
+                break;
+                
+            case "headshift":
+                slice.shiftHead(argument);
+                break;
+                
+            case "tailshift":
+                slice.shiftTail(argument);
+                break;
+                
+            case "rotate":
+                slice.rotate(argument);
+                break;
+                
+            case "rev":
+                slice.reverse();
+                break;
+                
+            case "set":
+                if (parts[2].length() != 1) {
+                    System.out.println(
+                            "Error: expected one character, received " + 
+                            parts[2].length());
+                    return;
+                }
+                
+                slice.set(argument, parts[2].charAt(0));
+        }
+    }
+    
     private static void printHelp() {
         System.out.println(
+                "quit  - " +
                 "----------------------------------------------\n" +
                 "quit         - Quit the demonstration.\n" +
                 "help         - Print this help list.\n" +

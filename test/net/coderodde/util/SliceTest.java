@@ -192,45 +192,44 @@ public class SliceTest {
     }
 
     @Test
-    public void testMoveLeft_int() {
+    public void testMoveLeft() {
         s = create().withArray(array)
                     .startingFrom(3)
                     .until(6); // 3, 4, 5
         
         is(s, 3, 4, 5);
-        s.moveLeft(2);
+        s.move(-2);
         is(s, 1, 2, 3);
-    }
-
-    @Test
-    public void testMoveLeft_0args() {
+        s.move(-3);
+        is(s, 18, 19, 0);
+        
         s = create().withArray(array)
                     .startingFrom(3)
                     .until(6); /// 3, 4, 5
         
         is(s, 3, 4, 5);
-        s.moveLeft();
+        s.move(-1);
         is(s, 2, 3, 4);
-        s.moveLeft();
+        s.move(-1);
         is(s, 1, 2, 3);
-        s.moveLeft();
+        s.move(-1);
         is(s, 0, 1, 2);
-        s.moveLeft();
+        s.move(-1);
         is(s, SIZE - 1, 0, 1);
-        s.moveLeft();
+        s.move(-1);
         is(s, SIZE - 2, SIZE - 1, 0);
     }
 
     @Test
-    public void testMoveRight_int() {
+    public void testMoveRight() {
         s = create().withArray(array)
                     .startingFrom(2)
                     .until(6); // 2, 3, 4, 5
         
         is(s, 2, 3, 4, 5);
-        s.moveRight(3);
+        s.move(3);
         is(s, 5, 6, 7, 8);
-        s.moveRight(2);
+        s.move(2);
         is(s, 7, 8, 9, 10);
         
         s = create().withArray(array)
@@ -238,22 +237,19 @@ public class SliceTest {
                     .until(1); // 18, 19, 0
         
         is(s, SIZE - 2, SIZE - 1, 0);
-        s.moveRight(2);
+        s.move(2);
         is(s, 0, 1, 2);
-        s.moveRight(5);
+        s.move(5);
         is(s, 5, 6, 7);
-    }
-
-    @Test
-    public void testMoveRight_0args() {
+        ////
         s = create().withArray(array)
                     .startingFrom(2)
                     .until(6); // 2, 3, 4, 5
         
         is(s, 2, 3, 4, 5);
-        s.moveRight();
+        s.move(1);
         is(s, 3, 4, 5, 6);
-        s.moveRight();
+        s.move(1);
         is(s, 4, 5, 6, 7);
         
         s = create().withArray(array)
@@ -261,13 +257,13 @@ public class SliceTest {
                     .untilEnd(); // 17, 18, 19
         
         is(s, SIZE - 3, SIZE - 2, SIZE - 1);
-        s.moveRight();
+        s.move(1);
         is(s, SIZE - 2, SIZE - 1, 0);
-        s.moveRight();
+        s.move(1);
         is(s, SIZE - 1, 0, 1);
-        s.moveRight();
+        s.move(1);
         is(s, 0, 1, 2);
-        s.moveRight();
+        s.move(1);
         is(s, 1, 2, 3);
     }
 
@@ -278,26 +274,25 @@ public class SliceTest {
                     .until(8); // 5, 6, 7
                 
         is(s, 5, 6, 7);
-        s.expandFront(3);
+        s.shiftHead(-3);
         is(s, 2, 3, 4, 5, 6, 7);
-        s.expandFront(4);
+        s.shiftHead(-4);
         is(s, SIZE - 2, SIZE - 1, 0, 1, 2, 3, 4, 5, 6 , 7);
-    }
+        
+        ////
 
-    @Test
-    public void testExpandFront_0args() {
         s = create().withArray(array)
                     .startingFrom(2)
                     .until(4); // 2, 3
         
         is(s, 2, 3);
-        s.expandFront();
+        s.shiftHead(-1);
         is(s, 1, 2, 3);
-        s.expandFront();
+        s.shiftHead(-1);
         is(s, 0, 1, 2, 3);
-        s.expandFront();
+        s.shiftHead(-1);
         is(s, SIZE - 1, 0, 1, 2, 3);
-        s.expandFront();
+        s.shiftHead(-1);
         is(s, SIZE - 2, SIZE - 1, 0, 1, 2, 3);
         
         array = new Integer[]{ 0, 1, 2 };
@@ -310,7 +305,7 @@ public class SliceTest {
         assertEquals(2, s.size());
         assertFalse(s.isEmpty());
         
-        s.expandFront();
+        s.shiftHead(-1);
         is(s, 1, 2, 0);
         assertEquals(3, s.size());
         assertFalse(s.isEmpty());
@@ -324,7 +319,7 @@ public class SliceTest {
         assertEquals(6, s.size());
         assertFalse(s.isEmpty());
         is(s, 17, 18, 19, 0, 1, 2);
-        s.expandFront();
+        s.shiftHead(-1);
         is(s, 16, 17, 18, 19, 0, 1, 2);
     }
 
@@ -335,18 +330,33 @@ public class SliceTest {
                     .until(5); // 1, 2, 3, 4
         
         is(s, 1, 2, 3, 4);
-        s.contractFront();
+        s.shiftHead(1);
         is(s, 2, 3, 4);
-        s.contractFront();
+        s.shiftHead(1);
         is(s, 3, 4);
-        s.contractFront();
+        s.shiftHead(1);
         is(s, 4);
-        s.contractFront();
+        s.shiftHead(1);
         is(s);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
-        s.contractFront();
+        s.shiftHead(2);
         is(s);
+        assertTrue(s.isEmpty());
+        assertEquals(0, s.size());
+        
+        ////
+        s = create().withArray(array)
+                    .startingFrom(4)
+                    .until(11); // 4, 5, 6, 7, 8, 9, 10
+        is(s, 4, 5, 6, 7, 8, 9, 10);
+        s.shiftHead(3);
+        is(s, 7, 8, 9, 10);
+        s.shiftHead(2);
+        is(s, 9, 10);
+        s.shiftHead(40);
+        is(s);
+        
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
     }
