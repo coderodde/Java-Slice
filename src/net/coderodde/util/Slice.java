@@ -2,7 +2,6 @@ package net.coderodde.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 /**
  * This utility class implements <b>cyclic</b> array slices. If you move the 
@@ -12,6 +11,7 @@ import java.util.Scanner;
  * 
  * @author Rodion "rodde" Efremov
  * @param <E> the actual array component type.
+ * @version 1.61
  */
 public class Slice<E> implements Iterable<E> {
 
@@ -26,7 +26,13 @@ public class Slice<E> implements Iterable<E> {
     private int fromIndex;
 
     /**
-     * The size of this slice. 
+     * The size of this slice. Another possibility is to maintain an 
+     * 'toIndex'. This does not work as well as wanted: if the user wants a
+     * slice covering the entire array, we will have 'fromIndex == toIndex', 
+     * which will denote also an empty slice. Basically, we are forced to cache
+     * the size (length) of any slice. Another arrangement would have been 
+     * keeping a boolean value indicating that the slice is full, yet it is 
+     * pretty ad-hoc.
      */
     private int size;
 
@@ -62,44 +68,113 @@ public class Slice<E> implements Iterable<E> {
         return new ArraySelector<>();
     }
     
+    /**
+     * Implements an array selector.
+     * 
+     * @param <E> the array component type.
+     */
     public static class ArraySelector<E> {
         
+        /**
+         * Creates a start index selector.
+         * 
+         * @param  array the chosen array.
+         * @return start index selector.
+         */
         public StartIndexSelector<E> withArray(E[] array) {
             return new StartIndexSelector<>(array);
         }
     }
     
+    /**
+     * Implements a start index selector.
+     * 
+     * @param <E> the array component type.
+     */
     public static class StartIndexSelector<E> {
         
+        /**
+         * The array being sliced.
+         */
         private final E[] array;
         
+        /**
+         * Constructs this start index selector.
+         * 
+         * @param array the array being sliced.
+         */
         public StartIndexSelector(E[] array) {
             this.array = array;
         }
         
+        /**
+         * Returns a slice covering the entire array in the same order as 
+         * components appear in the array.
+         * 
+         * @return a slice.
+         */
         public Slice<E> all() {
             return new Slice<>(array, 0, array.length);
         }
         
+        /**
+         * Chooses a particular starting index of a slice being constructed.
+         * 
+         * @param  fromIndex the starting index.
+         * @return second index selector.
+         */
         public SecondIndexSelector<E> startingFrom(int fromIndex) {
             return new SecondIndexSelector(array, fromIndex);
         }
     }
     
+    /**
+     * Implements second index selector.
+     * 
+     * @param <E> the array component type.
+     */
     public static class SecondIndexSelector<E> {
         
+        /**
+         * The array being sliced.
+         */
         private final E[] array;
+        
+        /**
+         * The starting index of a slice being constructed.
+         */
         private final int fromIndex;
         
+        /**
+         * Constructs this second index selector.
+         * 
+         * @param array     the array being sliced.
+         * @param fromIndex the starting index of the slice.
+         */
         public SecondIndexSelector(E[] array, int fromIndex) {
             this.array = array;
             this.fromIndex = fromIndex;
         }
         
+        /**
+         * Returns a slice covering everything starting from 
+         * <code>fromIndex</code>.
+         * 
+         * @return a slice.
+         */
         public Slice<E> untilEnd() {
             return new Slice<>(array, fromIndex, array.length);
         }
         
+        /**
+         * Returns a slice starting at <code>fromIndex</code> and ending at
+         * <code>toIndex</code>. If <code>fromIndex</code> is larger than
+         * <code>toIndex</code>, the slice wraps around the tail of the array
+         * being sliced. 
+         * 
+         * @param  toIndex the end index (exclusive).
+         * @return a slice.
+         */
         public Slice<E> until(int toIndex) {
             return new Slice<>(array, fromIndex, toIndex);
         }
@@ -131,7 +206,7 @@ public class Slice<E> implements Iterable<E> {
      * @return the element at the specified index.
      */
     public E get(final int index) {
-        checkIndex(index);
+        checkAccessIndex(index);
         return array[(fromIndex + index) % array.length];
     }
 
@@ -142,7 +217,7 @@ public class Slice<E> implements Iterable<E> {
      * @param value the new value to set.
      */
     public void set(final int index, final E value) {
-        checkIndex(index);
+        checkAccessIndex(index);
         array[(fromIndex + index) % array.length] = value;
     }
 
@@ -150,7 +225,7 @@ public class Slice<E> implements Iterable<E> {
      * Moves this slice. If <code>delta</code> is negative, moves this slice to 
      * the left <code>-delta</code> steps. Otherwise, moves this slice 
      * <code>delta</code> steps to the right. In any case, this slice may wrap
-     * around and reappear at the opposite and of the covered array.
+     * around and reappear at the opposite end of the covered array.
      * 
      * @param delta the movement delta.
      */
@@ -162,21 +237,19 @@ public class Slice<E> implements Iterable<E> {
         }
     }
     
-
     /**
      * Shifts the head of this slice. If <code>delta</code> is negative, expands
      * the head of this slice <code>-delta</code> amount of array components.
      * 
      * @param delta the shift delta.
      */
-    public void shiftHead(int delta) {
+    public void moveHeadPointer(int delta) {
         if (delta < 0) {
             expandHead(-delta);
         } else {
             contractHead(delta);
         }
     }
-    
 
     /**
      * Shifts the tail of this slice. If <code>delta</code> is negative, 
@@ -186,7 +259,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param delta the shift delta.
      */
-    public void shiftTail(int delta) {
+    public void moveTailPointer(int delta) {
         if (delta < 0) {
             contractTail(-delta);
         } else {
@@ -207,8 +280,8 @@ public class Slice<E> implements Iterable<E> {
 
     /**
      * Rotates this slice. If <code>delta</code> is negative, rotates to the
-     * left <code>Math.abs(delta)</code> array components. Otherwise, rotates to 
-     * the right <code>delta</code> array components.
+     * left <code>-delta</code> array components. Otherwise, rotates to the 
+     * right <code>delta</code> array components.
      * 
      * @param delta rotation delta.
      */
@@ -289,7 +362,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param index the index to check.
      */
-    private void checkIndex(final int index) {
+    private void checkAccessIndex(final int index) {
         final int size = size();
 
         if (size == 0) {
@@ -304,9 +377,8 @@ public class Slice<E> implements Iterable<E> {
     }
 
     /**
-     * Expands the front of this slice by at <code>amount</code> array
-     * components. This slice may "cycle" the same way as at motion to the left
-     * or right.
+     * Expands the front of this slice by <code>amount</code> array components.
+     * This slice may "cycle" the same way as at motion to the left or right.
      * 
      * @param amount the expansion length.
      */
@@ -322,7 +394,7 @@ public class Slice<E> implements Iterable<E> {
     }
 
     /**
-     * Contracts the front of this slice by at <code>amount</code> array
+     * Contracts the front of this slice by <code>amount</code> array
      * components.
      * 
      * @param amount the contraction length.
@@ -339,8 +411,7 @@ public class Slice<E> implements Iterable<E> {
     }
     
     /**
-     * Expands the back of this slice by at <code>amount</code> array 
-     * components.
+     * Expands the back of this slice by <code>amount</code> array components.
      * 
      * @param amount the expansion length.
      */
@@ -474,7 +545,7 @@ public class Slice<E> implements Iterable<E> {
 
         index -= steps;
 
-        // Unload the buffer.
+        // Dump the buffer.
         for (int j = 0; index < size; ++index, ++j) {
             set(index, (E) buffer[j]);
         }
@@ -489,14 +560,17 @@ public class Slice<E> implements Iterable<E> {
         checkNotNegative(steps);
         final Object[] buffer = new Object[steps];
 
+        // Load the buffer.
         for (int i = 0, j = size - steps; i < steps; ++i, ++j) {
             buffer[i] = get(j);
         }
 
+        // Rotate.
         for (int i = size - steps - 1; i >= 0; --i) {
             set(i + steps, get(i));
         }
 
+        // Dump the buffer.
         for (int i = 0; i < buffer.length; ++i) {
             set(i, (E) buffer[i]);
         }
@@ -560,145 +634,5 @@ public class Slice<E> implements Iterable<E> {
             --toIterateLeft;
             return Slice.this.get(index++);
         }
-    }
-
-    /**
-     * The entry point into a program.
-
-     * @param args the command line arguments.
-     */
-    public static void main(final String... args) {
-        final Character[] array = new Character[10];
-
-        for (char c = '0'; c <= '9'; ++c) {
-            array[c - '0'] = c;
-        }
-
-        final Slice<Character> slice = Slice.<Character>create()
-                                            .withArray(array)
-                                            .all();
-        
-        final Scanner scanner = new Scanner(System.in);
-
-        System.out.println(slice);
-
-        while (scanner.hasNext()) {
-
-            final String line = scanner.nextLine().trim().toLowerCase();
-            final String[] parts = line.split("\\s+");
-
-            if (parts.length < 2) {
-                continue;
-            }
-            
-            exec(line, slice);
-
-            System.out.println(slice);
-        }
-    }
-
-    private static void exec(String line, Slice<Character> slice) {
-        if (line.isEmpty()) {
-            return;
-        }
-        
-        String[] parts = line.split("\\s+");
-        final int len = parts.length;
-        
-        if (parts.length == 0) {
-            return;
-        }
-        
-        // Handle commands without arguments.
-        switch (parts[0]) {
-            case "rev":
-                slice.reverse();
-                break;
-                
-            case "help":
-                printHelp();
-                break;
-                
-            case "quit":
-                System.out.println("Bye!");
-                System.exit(0);
-        }
-        
-        if (parts[0].equals("set") && len < 3) {
-            System.out.println("\"set\" requires two arguments, but only " +
-                               (len - 1) + "received.");
-            return;
-        }
-        
-        if (len < 2) {
-            // Arguments not available.
-            System.out.println("Expecting an argument for command \"" + 
-                               parts[0] + "\"");
-            return;
-        }
-        
-        int argument;
-        int argument2 = 0;
-        
-        try {
-            argument = Integer.parseInt(parts[1]);
-            
-            if (parts[0].equals("set")) {
-                argument2 = Integer.parseInt(parts[2]);
-            }
-        } catch (NumberFormatException nfe) {
-            System.out.println("Argument is not an integer: " + parts[1]);
-            return;
-        }
-        
-        switch (parts[0]) {
-            case "move":
-                slice.move(argument);
-                break;
-                
-            case "headshift":
-                slice.shiftHead(argument);
-                break;
-                
-            case "tailshift":
-                slice.shiftTail(argument);
-                break;
-                
-            case "rotate":
-                slice.rotate(argument);
-                break;
-                
-            case "rev":
-                slice.reverse();
-                break;
-                
-            case "set":
-                if (parts[2].length() != 1) {
-                    System.out.println(
-                            "Error: expected one character, received " + 
-                            parts[2].length());
-                    return;
-                }
-                
-                slice.set(argument, parts[2].charAt(0));
-        }
-    }
-    
-    private static void printHelp() {
-        System.out.println(
-                "quit  - " +
-                "----------------------------------------------\n" +
-                "quit         - Quit the demonstration.\n" +
-                "help         - Print this help list.\n" +
-                "left [N]     - Move the slice to the left.\n" +
-                "right [N]    - Move the slice to the right.\n" +
-                "exfront [N]  - Expand the front.\n" + 
-                "exback [N]   - Expand the back.\n" +
-                "confront [N] - Contract the front.\n" +
-                "conback [N]  - Contract the back.\n" +
-                "lcycle [N]   - Cycle the slice to the left.\n" +
-                "rcycle [N]   - Cycle the slice to the right.\n" +
-                "rev          - Reverse the range covered by this slice.\n" +
-                "----------------------------------------------\n");
     }
 }

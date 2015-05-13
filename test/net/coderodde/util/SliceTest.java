@@ -274,9 +274,9 @@ public class SliceTest {
                     .until(8); // 5, 6, 7
                 
         is(s, 5, 6, 7);
-        s.shiftHead(-3);
+        s.moveHeadPointer(-3);
         is(s, 2, 3, 4, 5, 6, 7);
-        s.shiftHead(-4);
+        s.moveHeadPointer(-4);
         is(s, SIZE - 2, SIZE - 1, 0, 1, 2, 3, 4, 5, 6 , 7);
         
         ////
@@ -286,13 +286,13 @@ public class SliceTest {
                     .until(4); // 2, 3
         
         is(s, 2, 3);
-        s.shiftHead(-1);
+        s.moveHeadPointer(-1);
         is(s, 1, 2, 3);
-        s.shiftHead(-1);
+        s.moveHeadPointer(-1);
         is(s, 0, 1, 2, 3);
-        s.shiftHead(-1);
+        s.moveHeadPointer(-1);
         is(s, SIZE - 1, 0, 1, 2, 3);
-        s.shiftHead(-1);
+        s.moveHeadPointer(-1);
         is(s, SIZE - 2, SIZE - 1, 0, 1, 2, 3);
         
         array = new Integer[]{ 0, 1, 2 };
@@ -305,7 +305,7 @@ public class SliceTest {
         assertEquals(2, s.size());
         assertFalse(s.isEmpty());
         
-        s.shiftHead(-1);
+        s.moveHeadPointer(-1);
         is(s, 1, 2, 0);
         assertEquals(3, s.size());
         assertFalse(s.isEmpty());
@@ -319,7 +319,7 @@ public class SliceTest {
         assertEquals(6, s.size());
         assertFalse(s.isEmpty());
         is(s, 17, 18, 19, 0, 1, 2);
-        s.shiftHead(-1);
+        s.moveHeadPointer(-1);
         is(s, 16, 17, 18, 19, 0, 1, 2);
         
         ////
@@ -329,17 +329,17 @@ public class SliceTest {
                     .until(5); // 1, 2, 3, 4
         
         is(s, 1, 2, 3, 4);
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s, 2, 3, 4);
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s, 3, 4);
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s, 4);
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
-        s.shiftHead(2);
+        s.moveHeadPointer(2);
         is(s);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
@@ -349,11 +349,11 @@ public class SliceTest {
                     .startingFrom(4)
                     .until(11); // 4, 5, 6, 7, 8, 9, 10
         is(s, 4, 5, 6, 7, 8, 9, 10);
-        s.shiftHead(3);
+        s.moveHeadPointer(3);
         is(s, 7, 8, 9, 10);
-        s.shiftHead(2);
+        s.moveHeadPointer(2);
         is(s, 9, 10);
-        s.shiftHead(40);
+        s.moveHeadPointer(40);
         is(s);
         
         assertTrue(s.isEmpty());
@@ -367,21 +367,21 @@ public class SliceTest {
                     .until(6); // 2, 3, 4, 5
         
         is(s, 2, 3, 4, 5);
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s, 3, 4, 5);
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s, 4, 5);
         assertFalse(s.isEmpty());
         assertEquals(2, s.size());
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s, 5);
         
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
         
-        s.shiftHead(1);
+        s.moveHeadPointer(1);
         is(s);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
@@ -394,9 +394,9 @@ public class SliceTest {
                     .untilEnd(); // 17, 18, 19
         
         is(s, 17, 18, 19);
-        s.shiftTail(3);
+        s.moveTailPointer(3);
         is(s, 17, 18, 19, 0, 1, 2);
-        s.shiftTail(2);
+        s.moveTailPointer(2);
         is(s, 17, 18, 19, 0, 1, 2, 3, 4);
         
         s = create().withArray(array)
@@ -404,11 +404,11 @@ public class SliceTest {
                     .untilEnd(); // 18, 19
         
         is(s, 18, 19);
-        s.shiftTail(1);
+        s.moveTailPointer(1);
         is(s, 18, 19, 0);
-        s.shiftTail(1);
+        s.moveTailPointer(1);
         is(s, 18, 19, 0, 1);
-        s.shiftTail(1);
+        s.moveTailPointer(1);
         is(s, 18, 19, 0, 1, 2);
         assertEquals(5, s.size());
         assertFalse(s.isEmpty());
@@ -422,17 +422,17 @@ public class SliceTest {
         
         assertEquals(6, s.size());
         is(s, 17, 18, 19, 0, 1, 2);
-        s.shiftTail(-2);
+        s.moveTailPointer(-2);
         is(s, 17, 18, 19, 0);
-        s.shiftTail(-3);
+        s.moveTailPointer(-3);
         is(s, 17);
         assertEquals(1, s.size());
         
-        s.shiftTail(-10);
+        s.moveTailPointer(-10);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
         
-        s.shiftTail(-10);
+        s.moveTailPointer(-10);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
         
@@ -443,21 +443,21 @@ public class SliceTest {
                     .until(10); // 5, 6, 7, 8, 9
         
         is(s, 5, 6, 7, 8, 9);
-        s.shiftTail(-1);
+        s.moveTailPointer(-1);
         is(s, 5, 6, 7, 8);
-        s.shiftTail(-1);
+        s.moveTailPointer(-1);
         is(s, 5, 6, 7);
-        s.shiftTail(-1);
+        s.moveTailPointer(-1);
         is(s, 5, 6);
-        s.shiftTail(-1);
+        s.moveTailPointer(-1);
         is(s, 5);
-        s.shiftTail(-1);
+        s.moveTailPointer(-1);
         is(s);
         
         assertEquals(0, s.size());
         assertTrue(s.isEmpty());
         
-        s.shiftHead(-3);
+        s.moveHeadPointer(-3);
         is(s, 2, 3, 4);
     }
 
@@ -472,14 +472,14 @@ public class SliceTest {
         is(s, 6, 5, 4, 3, 2);
         s.reverse();
         is(s, 2, 3, 4, 5, 6);
-        s.shiftHead(1);
-        s.shiftTail(-1); 
+        s.moveHeadPointer(1);
+        s.moveTailPointer(-1); 
         // 3, 4, 5
         is(s, 3, 4, 5);
         s.reverse();
         is(s, 5, 4, 3);
-        s.shiftHead(-1);
-        s.shiftTail(1);
+        s.moveHeadPointer(-1);
+        s.moveTailPointer(1);
         is(s, 2, 5, 4, 3, 6);
     }
 
@@ -499,14 +499,14 @@ public class SliceTest {
         s.rotate(-4);
         is(s, 6, 7, 8, 9, 5);
         
-        s.shiftHead(1);
-        s.shiftTail(-1);
+        s.moveHeadPointer(1);
+        s.moveTailPointer(-1);
         
         is(s, 7, 8, 9);
         s.rotate(-2);
         is(s, 9, 7, 8);
-        s.shiftHead(-1);
-        s.shiftTail(1);
+        s.moveHeadPointer(-1);
+        s.moveTailPointer(1);
         is(s, 6, 9, 7, 8, 5);
         
         s = create().withArray(array)
@@ -516,7 +516,7 @@ public class SliceTest {
         is(s, 18, 19, 0, 1);
         s.rotate(-2);
         is(s, 0, 1, 18, 19);
-        s.shiftHead(2);
+        s.moveHeadPointer(2);
         is(s, 18, 19);
         
         s.rotate(-2);
@@ -524,11 +524,11 @@ public class SliceTest {
         
         s.rotate(-1);
         is(s, 19, 18);
-        s.shiftTail(-1);
+        s.moveTailPointer(-1);
         is(s, 19);
         s.rotate(-3);
         is(s, 19);
-        s.shiftTail(-1);
+        s.moveTailPointer(-1);
         is(s);
         s.rotate(-2);
         s.rotate(-3);
@@ -606,7 +606,7 @@ public class SliceTest {
         is(s, 5, 6, 7);
         s.rotate(1);
         is(s, 7, 5, 6);
-        s.shiftTail(-10);
+        s.moveTailPointer(-10);
         is(s);
         s.rotate(1);
         is(s);
