@@ -4,6 +4,7 @@ import java.util.Iterator;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import static net.coderodde.util.Slice.create;
 
 public class SliceTest {
     
@@ -23,7 +24,9 @@ public class SliceTest {
     
     @Test
     public void testIterator() {
-        Slice s = new Slice(array);
+        s = create().withArray(array)
+                    .all();
+        
         Iterator<Integer> it = s.iterator();
         
         for (int i = 0; i < array.length; ++i) {
@@ -32,7 +35,10 @@ public class SliceTest {
         
         assertFalse(it.hasNext());
         
-        s = new Slice(array, array.length / 2);
+        s = create().withArray(array)
+                    .startingFrom(array.length / 2)
+                    .untilEnd(); // 10, 11, 12, ..., 19
+        
         it = s.iterator();
         
         for (int i = array.length / 2; i < array.length; ++i) {
@@ -41,7 +47,10 @@ public class SliceTest {
         
         assertFalse(it.hasNext());
         
-        s = new Slice(array, 2, array.length / 2);
+        s = create().withArray(array)
+                    .startingFrom(2)
+                    .until(array.length / 2); // 2, 3, 4, ..., 9
+        
         it = s.iterator();
         
         for (int i = 2; i < array.length / 2; ++i) {
@@ -50,44 +59,103 @@ public class SliceTest {
         
         assertFalse(it.hasNext());
         
-        s = new Slice(array, 3, 3);
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(3); // Empty slice.
+        
         it = s.iterator();
         assertFalse(it.hasNext());
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testThrowsOnNegativeFromIndex() {
-        new Slice(array, -1);
+        create().withArray(array)
+                .startingFrom(-1)
+                .untilEnd();
     }
     
     @Test
     public void testThrowsOnBadToIndex() {
-        new Slice(array, 3, SIZE);
+        create().withArray(array)
+                .startingFrom(3)
+                .until(SIZE);
     }
     
     @Test(expected = NullPointerException.class)
     public void testThrowsOnNullArray() {
-        new Slice(null);
+        create().withArray(null)
+                .all();
     }
 
     @Test
     public void testIsEmpty() {
-        assertTrue(new Slice(array, 3, 3).isEmpty());
-        assertTrue(new Slice(array, 0, 0).isEmpty());
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(3);
+        
+        assertTrue(s.isEmpty());
+        
+        s = create().withArray(array)
+                    .startingFrom(0)
+                    .until(0);
+        
+        assertTrue(s.isEmpty());
     }
 
     @Test
     public void testSize() {
-        assertEquals(array.length, new Slice(array).size());
-        assertEquals(3, new Slice(array, 3, 6).size());
-        assertEquals(2, new Slice(array, 3, 5).size());
-        assertEquals(1, new Slice(array, 3, 4).size());
-        assertEquals(0, new Slice(array, 3, 3).size());
+        s = create().withArray(array).all();
+        
+        assertEquals(array.length, s.size());
+        
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(6);
+        
+        assertEquals(3, s.size());
+        
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(5);
+        
+        assertEquals(2, s.size());
+        
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(4);
+        
+        assertEquals(1, s.size());
+        
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(3);
+        
+        assertEquals(0, s.size());
+        
+        s = create().withArray(array)
+                    .startingFrom(4)
+                    .until(3);
+        
+        assertEquals(array.length - 1, s.size());
+        
+        s = create().withArray(array)
+                    .startingFrom(4)
+                    .until(2);
+        
+        assertEquals(array.length - 2, s.size());
+        
+        s = create().withArray(array)
+                    .startingFrom(5)
+                    .until(3);
+        
+        assertEquals(array.length - 2, s.size());
     }
 
     @Test
     public void testGet() {
-        Slice s = new Slice(array, 3);
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .untilEnd();
         
         assertEquals(3, s.get(0));
         assertEquals(4, s.get(1));
@@ -96,17 +164,24 @@ public class SliceTest {
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void testGetThrowsOnSmallIndex() {
-        new Slice(array).get(-1);
+        create().withArray(array)
+                .all()
+                .get(-1);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void testGetThrowsOnLargeIndex() {
-        new Slice(array).get(array.length);
+        create().withArray(array)
+                .all()
+                .get(array.length);
     }
     
     @Test
     public void testSet() {
-        Slice s = new Slice(array, 5, 10);
+        s = create().withArray(array)
+                    .startingFrom(5)
+                    .until(10);       // 5, 6, 7, 8, 9
+        
         assertEquals(5, s.get(0));
         s.set(0, 15);
         assertEquals(15, s.get(0));
@@ -118,7 +193,10 @@ public class SliceTest {
 
     @Test
     public void testMoveLeft_int() {
-        Slice s = new Slice(array, 3, 6); // size 3
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(6); // 3, 4, 5
+        
         is(s, 3, 4, 5);
         s.moveLeft(2);
         is(s, 1, 2, 3);
@@ -126,7 +204,10 @@ public class SliceTest {
 
     @Test
     public void testMoveLeft_0args() {
-        Slice s = new Slice(array, 3, 6); // size 3
+        s = create().withArray(array)
+                    .startingFrom(3)
+                    .until(6); /// 3, 4, 5
+        
         is(s, 3, 4, 5);
         s.moveLeft();
         is(s, 2, 3, 4);
@@ -142,14 +223,20 @@ public class SliceTest {
 
     @Test
     public void testMoveRight_int() {
-        Slice s = new Slice(array, 2, 6); // size 4
+        s = create().withArray(array)
+                    .startingFrom(2)
+                    .until(6); // 2, 3, 4, 5
+        
         is(s, 2, 3, 4, 5);
         s.moveRight(3);
         is(s, 5, 6, 7, 8);
         s.moveRight(2);
         is(s, 7, 8, 9, 10);
         
-        s = new Slice(array, SIZE - 2, 1); // size 3: 18, 19, 0
+        s = create().withArray(array)
+                    .startingFrom(SIZE - 2)
+                    .until(1); // 18, 19, 0
+        
         is(s, SIZE - 2, SIZE - 1, 0);
         s.moveRight(2);
         is(s, 0, 1, 2);
@@ -159,14 +246,20 @@ public class SliceTest {
 
     @Test
     public void testMoveRight_0args() {
-        Slice s = new Slice(array, 2, 6);
+        s = create().withArray(array)
+                    .startingFrom(2)
+                    .until(6); // 2, 3, 4, 5
+        
         is(s, 2, 3, 4, 5);
         s.moveRight();
         is(s, 3, 4, 5, 6);
         s.moveRight();
         is(s, 4, 5, 6, 7);
         
-        s = new Slice(array, array.length - 3); // size 3
+        s = create().withArray(array)
+                    .startingFrom(array.length - 3)
+                    .untilEnd(); // 17, 18, 19
+        
         is(s, SIZE - 3, SIZE - 2, SIZE - 1);
         s.moveRight();
         is(s, SIZE - 2, SIZE - 1, 0);
@@ -180,7 +273,10 @@ public class SliceTest {
 
     @Test
     public void testExpandFront_int() {
-        Slice s = new Slice(array, 5, 8);
+        s = create().withArray(array)
+                    .startingFrom(5)
+                    .until(8); // 5, 6, 7
+                
         is(s, 5, 6, 7);
         s.expandFront(3);
         is(s, 2, 3, 4, 5, 6, 7);
@@ -190,7 +286,10 @@ public class SliceTest {
 
     @Test
     public void testExpandFront_0args() {
-        Slice s = new Slice(array, 2, 4);
+        s = create().withArray(array)
+                    .startingFrom(2)
+                    .until(4); // 2, 3
+        
         is(s, 2, 3);
         s.expandFront();
         is(s, 1, 2, 3);
@@ -202,7 +301,11 @@ public class SliceTest {
         is(s, SIZE - 2, SIZE - 1, 0, 1, 2, 3);
         
         array = new Integer[]{ 0, 1, 2 };
-        s = new Slice(array, 2, 1); // 2, 0
+        
+        s = create().withArray(array)
+                    .startingFrom(2)
+                    .until(1); // 2, 0
+        
         is(s, 2, 0);
         assertEquals(2, s.size());
         assertFalse(s.isEmpty());
@@ -211,11 +314,26 @@ public class SliceTest {
         is(s, 1, 2, 0);
         assertEquals(3, s.size());
         assertFalse(s.isEmpty());
+        
+        init();
+        
+        s = create().withArray(array)
+                    .startingFrom(array.length - 3)
+                    .until(3); // 17, 18, 19, 0, 1, 2
+        
+        assertEquals(6, s.size());
+        assertFalse(s.isEmpty());
+        is(s, 17, 18, 19, 0, 1, 2);
+        s.expandFront();
+        is(s, 16, 17, 18, 19, 0, 1, 2);
     }
 
     @Test
     public void testContractFront_int() {
-        s = new Slice(array, 1, 5);
+        s = create().withArray(array)
+                    .startingFrom(1)
+                    .until(5); // 1, 2, 3, 4
+        
         is(s, 1, 2, 3, 4);
         s.contractFront();
         is(s, 2, 3, 4);
@@ -235,7 +353,10 @@ public class SliceTest {
 
     @Test
     public void testContractFront_0args() {
-        s = new Slice(array, 2, 6);
+        s = create().withArray(array)
+                    .startingFrom(2)
+                    .until(6); // 2, 3, 4, 5
+        
         is(s, 2, 3, 4, 5);
         s.contractFront();
         is(s, 3, 4, 5);
@@ -259,7 +380,10 @@ public class SliceTest {
 
     @Test
     public void testExpandBack_int() {
-        s = new Slice(array, SIZE - 3); // 17, 18, 19
+        s = create().withArray(array)
+                    .startingFrom(array.length - 3)
+                    .untilEnd(); // 17, 18, 19
+        
         is(s, 17, 18, 19);
         s.expandBack(3);
         is(s, 17, 18, 19, 0, 1, 2);
@@ -269,7 +393,10 @@ public class SliceTest {
 
     @Test
     public void testExpandBack_0args() {
-        s = new Slice(array, SIZE - 2); // 18, 19
+        s = create().withArray(array)
+                    .startingFrom(array.length - 2)
+                    .untilEnd(); // 18, 19
+        
         is(s, 18, 19);
         s.expandBack();
         is(s, 18, 19, 0);
@@ -283,7 +410,10 @@ public class SliceTest {
 
     @Test
     public void testContractBack_int() {
-        s = new Slice(array, SIZE - 3, 3); // 17, 18, 19, 0, 1, 2
+        s = create().withArray(array)
+                    .startingFrom(array.length - 3)
+                    .until(3); // 17, 18, 19, 0, 1, 2
+        
         assertEquals(6, s.size());
         is(s, 17, 18, 19, 0, 1, 2);
         s.contractBack(2);
@@ -303,7 +433,10 @@ public class SliceTest {
 
     @Test
     public void testContractBack_0args() {
-        s = new Slice(array, 5, 10); // 5, 6, 7, 8, 9
+        s = create().withArray(array)
+                    .startingFrom(5)
+                    .until(10); // 5, 6, 7, 8, 9
+        
         is(s, 5, 6, 7, 8, 9);
         s.contractBack();
         is(s, 5, 6, 7, 8);
@@ -325,7 +458,10 @@ public class SliceTest {
 
     @Test
     public void testReverse() {
-        s = new Slice(array, 2, 7); // 2, 3, 4, 5, 6
+        s = create().withArray(array)
+                    .startingFrom(2)
+                    .until(7); // 2, 3, 4, 5, 6
+        
         is(s, 2, 3, 4, 5, 6);
         s.reverse();
         is(s, 6, 5, 4, 3, 2);
@@ -343,7 +479,10 @@ public class SliceTest {
 
     @Test
     public void testCycleLeft_int() {
-        s = new Slice(array, 5, 10);
+        s = create().withArray(array)
+                    .startingFrom(5)
+                    .until(10); // 5, 6, 7, 8, 9
+        
         is(s, 5, 6, 7, 8, 9);
         s.cycleLeft(2);
         is(s, 7, 8, 9, 5, 6);
@@ -364,7 +503,10 @@ public class SliceTest {
         s.expandBack();
         is(s, 6, 9, 7, 8, 5);
         
-        s = new Slice(array, SIZE - 2, 2); // 18, 19, 0, 1
+        s = create().withArray(array)
+                    .startingFrom(array.length - 2)
+                    .until(2); // 18, 19, 0, 1
+        
         is(s, 18, 19, 0, 1);
         s.cycleLeft(2);
         is(s, 0, 1, 18, 19);
@@ -389,7 +531,12 @@ public class SliceTest {
         
         ////
         init();
-        s = new Slice(array, 4, 9); // 4, 5, 6, 7, 8
+        ////
+        
+        s = create().withArray(array)
+                    .startingFrom(4)
+                    .until(9); // 4, 5, 6, 7, 8
+        
         s.cycleLeft(5);
         is(s, 4, 5, 6, 7, 8);
         s.cycleLeft(7);
@@ -404,7 +551,10 @@ public class SliceTest {
 
     @Test
     public void testCycleLeft_0args() {
-        s = new Slice(array, 10, 14);
+        s = create().withArray(array)
+                    .startingFrom(10)
+                    .until(14); // 10, 11, 12, 13
+        
         is(s, 10, 11, 12, 13);
         s.cycleLeft();
         is(s, 11, 12, 13, 10);
@@ -420,7 +570,10 @@ public class SliceTest {
 
     @Test
     public void testCycleRight_int() {
-        s = new Slice(array, 4, 9); // 4, 5, 6, 7, 8
+        s = create().withArray(array)
+                    .startingFrom(4)
+                    .until(9); // 4, 5, 6, 7, 8
+        
         s.cycleRight(5);
         is(s, 4, 5, 6, 7, 8);
         s.cycleRight(7);
@@ -435,7 +588,10 @@ public class SliceTest {
 
     @Test
     public void testCycleRight_0args() {
-        s = new Slice(array, 5, 8); // 5, 6, 7
+        s = create().withArray(array)
+                    .startingFrom(5)
+                    .until(8); // 5, 6, 7
+        
         is(s, 5, 6, 7);
         s.cycleRight();
         is(s, 7, 5, 6);

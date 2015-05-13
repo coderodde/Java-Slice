@@ -31,26 +31,6 @@ public class Slice<E> implements Iterable<E> {
     private int size;
 
     /**
-     * Constructs a slice representing the entire array.
-     * 
-     * @param array the array being sliced.
-     */
-    public Slice(final E[] array) {
-        this(array, 0, array.length);
-    }
-
-    /**
-     * Constructs a slice representing everything starting at index
-     * <code>fromIndex</code>.
-     * 
-     * @param array     the array being sliced.
-     * @param fromIndex the starting index.
-     */
-    public Slice(final E[] array, final int fromIndex) {
-        this(array, fromIndex, array.length);
-    }
-
-    /**
      * Constructs a new slice for <code>array</code> starting at 
      * <code>fromIndex</code> and ending at <code>toIndex - 1</code>.
      * 
@@ -58,9 +38,9 @@ public class Slice<E> implements Iterable<E> {
      * @param fromIndex the starting (inclusive) index.
      * @param toIndex   the ending (exclusive) index.
      */
-    public Slice(final E[] array, 
-                 final int fromIndex, 
-                 final int toIndex) {
+    private Slice(E[] array, 
+                  int fromIndex, 
+                  int toIndex) {
         checkArray(array);
         checkIndexForArray(array, fromIndex);
         checkIndexForArray(array, toIndex);
@@ -72,6 +52,59 @@ public class Slice<E> implements Iterable<E> {
                     array.length - fromIndex + toIndex;
     }
 
+    /**
+     * Initiates the fluent API for constructing aliases.
+     * 
+     * @param  <E> the array component type.
+     * @return array selector.
+     */
+    public static <E> ArraySelector<E> create() {
+        return new ArraySelector<>();
+    }
+    
+    public static class ArraySelector<E> {
+        
+        public StartIndexSelector<E> withArray(E[] array) {
+            return new StartIndexSelector<>(array);
+        }
+    }
+    
+    public static class StartIndexSelector<E> {
+        
+        private final E[] array;
+        
+        public StartIndexSelector(E[] array) {
+            this.array = array;
+        }
+        
+        public Slice<E> all() {
+            return new Slice<>(array, 0, array.length);
+        }
+        
+        public SecondIndexSelector<E> startingFrom(int fromIndex) {
+            return new SecondIndexSelector(array, fromIndex);
+        }
+    }
+    
+    public static class SecondIndexSelector<E> {
+        
+        private final E[] array;
+        private final int fromIndex;
+        
+        public SecondIndexSelector(E[] array, int fromIndex) {
+            this.array = array;
+            this.fromIndex = fromIndex;
+        }
+        
+        public Slice<E> untilEnd() {
+            return new Slice<>(array, fromIndex, array.length);
+        }
+        
+        public Slice<E> until(int toIndex) {
+            return new Slice<>(array, fromIndex, toIndex);
+        }
+    }
+    
     /**
      * Returns <code>true</code> if this slice is empty.
      * 
@@ -526,7 +559,10 @@ public class Slice<E> implements Iterable<E> {
             array[c - '0'] = c;
         }
 
-        final Slice<Character> slice = new Slice<>(array);
+        final Slice<Character> slice = Slice.<Character>create()
+                                            .withArray(array)
+                                            .all();
+        
         final Scanner scanner = new Scanner(System.in);
 
         System.out.println(slice);
