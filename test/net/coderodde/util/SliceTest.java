@@ -268,7 +268,7 @@ public class SliceTest {
     }
 
     @Test
-    public void testExpandFront_int() {
+    public void testShiftHeadPointerToLeft() {
         s = create().withArray(array)
                     .startingFrom(5)
                     .until(8); // 5, 6, 7
@@ -321,10 +321,9 @@ public class SliceTest {
         is(s, 17, 18, 19, 0, 1, 2);
         s.shiftHead(-1);
         is(s, 16, 17, 18, 19, 0, 1, 2);
-    }
-
-    @Test
-    public void testContractFront_int() {
+        
+        ////
+        
         s = create().withArray(array)
                     .startingFrom(1)
                     .until(5); // 1, 2, 3, 4
@@ -362,107 +361,103 @@ public class SliceTest {
     }
 
     @Test
-    public void testContractFront_0args() {
+    public void testShiftHeadPointerToRight() {
         s = create().withArray(array)
                     .startingFrom(2)
                     .until(6); // 2, 3, 4, 5
         
         is(s, 2, 3, 4, 5);
-        s.contractFront();
+        s.shiftHead(1);
         is(s, 3, 4, 5);
-        s.contractFront();
+        s.shiftHead(1);
         is(s, 4, 5);
         assertFalse(s.isEmpty());
         assertEquals(2, s.size());
-        s.contractFront();
+        s.shiftHead(1);
         is(s, 5);
         
-        s.contractFront();
+        s.shiftHead(1);
         is(s);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
         
-        s.contractFront();
+        s.shiftHead(1);
         is(s);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
     }
 
     @Test
-    public void testExpandBack_int() {
+    public void testShiftTailPointerToRight() {
         s = create().withArray(array)
                     .startingFrom(array.length - 3)
                     .untilEnd(); // 17, 18, 19
         
         is(s, 17, 18, 19);
-        s.expandBack(3);
+        s.shiftTail(3);
         is(s, 17, 18, 19, 0, 1, 2);
-        s.expandBack(2);
+        s.shiftTail(2);
         is(s, 17, 18, 19, 0, 1, 2, 3, 4);
-    }
-
-    @Test
-    public void testExpandBack_0args() {
+        
         s = create().withArray(array)
                     .startingFrom(array.length - 2)
                     .untilEnd(); // 18, 19
         
         is(s, 18, 19);
-        s.expandBack();
+        s.shiftTail(1);
         is(s, 18, 19, 0);
-        s.expandBack();
+        s.shiftTail(1);
         is(s, 18, 19, 0, 1);
-        s.expandBack();
+        s.shiftTail(1);
         is(s, 18, 19, 0, 1, 2);
         assertEquals(5, s.size());
         assertFalse(s.isEmpty());
     }
 
     @Test
-    public void testContractBack_int() {
+    public void testShiftTailPointerToLeft() {
         s = create().withArray(array)
                     .startingFrom(array.length - 3)
                     .until(3); // 17, 18, 19, 0, 1, 2
         
         assertEquals(6, s.size());
         is(s, 17, 18, 19, 0, 1, 2);
-        s.contractBack(2);
+        s.shiftTail(-2);
         is(s, 17, 18, 19, 0);
-        s.contractBack(3);
+        s.shiftTail(-3);
         is(s, 17);
         assertEquals(1, s.size());
         
-        s.contractBack(10);
+        s.shiftTail(-10);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
         
-        s.contractBack(10);
+        s.shiftTail(-10);
         assertTrue(s.isEmpty());
         assertEquals(0, s.size());
-    }
-
-    @Test
-    public void testContractBack_0args() {
+        
+        ////
+        
         s = create().withArray(array)
                     .startingFrom(5)
                     .until(10); // 5, 6, 7, 8, 9
         
         is(s, 5, 6, 7, 8, 9);
-        s.contractBack();
+        s.shiftTail(-1);
         is(s, 5, 6, 7, 8);
-        s.contractBack();
+        s.shiftTail(-1);
         is(s, 5, 6, 7);
-        s.contractBack();
+        s.shiftTail(-1);
         is(s, 5, 6);
-        s.contractBack();
+        s.shiftTail(-1);
         is(s, 5);
-        s.contractBack();
+        s.shiftTail(-1);
         is(s);
         
         assertEquals(0, s.size());
         assertTrue(s.isEmpty());
         
-        s.expandFront(3);
+        s.shiftHead(-3);
         is(s, 2, 3, 4);
     }
 
@@ -477,40 +472,41 @@ public class SliceTest {
         is(s, 6, 5, 4, 3, 2);
         s.reverse();
         is(s, 2, 3, 4, 5, 6);
-        s.contractFront();
-        s.contractBack();
+        s.shiftHead(1);
+        s.shiftTail(-1); 
+        // 3, 4, 5
         is(s, 3, 4, 5);
         s.reverse();
         is(s, 5, 4, 3);
-        s.expandFront();
-        s.expandBack();
+        s.shiftHead(-1);
+        s.shiftTail(1);
         is(s, 2, 5, 4, 3, 6);
     }
 
     @Test
-    public void testCycleLeft_int() {
+    public void testRotateLeft() {
         s = create().withArray(array)
                     .startingFrom(5)
                     .until(10); // 5, 6, 7, 8, 9
         
         is(s, 5, 6, 7, 8, 9);
-        s.cycleLeft(2);
+        s.rotate(-2);
         is(s, 7, 8, 9, 5, 6);
-        s.cycleLeft(5);
+        s.rotate(-5);
         is(s, 7, 8, 9, 5, 6);
-        s.cycleLeft(0);
+        s.rotate(0);
         is(s, 7, 8, 9, 5, 6);
-        s.cycleLeft(4);
+        s.rotate(-4);
         is(s, 6, 7, 8, 9, 5);
         
-        s.contractFront();
-        s.contractBack();
+        s.shiftHead(1);
+        s.shiftTail(-1);
         
         is(s, 7, 8, 9);
-        s.cycleLeft(2);
+        s.rotate(-2);
         is(s, 9, 7, 8);
-        s.expandFront();
-        s.expandBack();
+        s.shiftHead(-1);
+        s.shiftTail(1);
         is(s, 6, 9, 7, 8, 5);
         
         s = create().withArray(array)
@@ -518,24 +514,24 @@ public class SliceTest {
                     .until(2); // 18, 19, 0, 1
         
         is(s, 18, 19, 0, 1);
-        s.cycleLeft(2);
+        s.rotate(-2);
         is(s, 0, 1, 18, 19);
-        s.contractFront(2);
+        s.shiftHead(2);
         is(s, 18, 19);
         
-        s.cycleLeft(2);
+        s.rotate(-2);
         is(s, 18, 19);
         
-        s.cycleLeft(1);
+        s.rotate(-1);
         is(s, 19, 18);
-        s.contractBack();
+        s.shiftTail(-1);
         is(s, 19);
-        s.cycleLeft(3);
+        s.rotate(-3);
         is(s, 19);
-        s.contractBack();
+        s.shiftTail(-1);
         is(s);
-        s.cycleLeft(2);
-        s.cycleLeft(3);
+        s.rotate(-2);
+        s.rotate(-3);
         is(s);
         assertTrue(s.isEmpty());
         
@@ -547,77 +543,76 @@ public class SliceTest {
                     .startingFrom(4)
                     .until(9); // 4, 5, 6, 7, 8
         
-        s.cycleLeft(5);
+        s.rotate(-5);
         is(s, 4, 5, 6, 7, 8);
-        s.cycleLeft(7);
+        s.rotate(-7);
         is(s, 6, 7, 8, 4, 5);
-        s.cycleLeft(3);
+        s.rotate(-3);
         is(s, 4, 5, 6, 7, 8);
-        s.cycleLeft(1);
+        s.rotate(-1);
         is(s, 5, 6, 7, 8, 4);
         assertFalse(s.isEmpty());
         assertEquals(5, s.size());
-    }
-
-    @Test
-    public void testCycleLeft_0args() {
+        
+        ////
+        
         s = create().withArray(array)
                     .startingFrom(10)
                     .until(14); // 10, 11, 12, 13
         
         is(s, 10, 11, 12, 13);
-        s.cycleLeft();
+        s.rotate(-1);
         is(s, 11, 12, 13, 10);
-        s.cycleLeft();
+        s.rotate(-1);
         is(s, 12, 13, 10, 11);
-        s.cycleLeft();
+        s.rotate(-1);
         is(s, 13, 10, 11, 12);
-        s.cycleLeft();
+        s.rotate(-1);
         is(s, 10, 11, 12, 13);
-        s.cycleLeft();
+        s.rotate(-1);
         is(s, 11, 12, 13, 10);
     }
 
     @Test
-    public void testCycleRight_int() {
+    public void testRotateRight() {
         s = create().withArray(array)
                     .startingFrom(4)
                     .until(9); // 4, 5, 6, 7, 8
         
-        s.cycleRight(5);
+        s.rotate(5);
         is(s, 4, 5, 6, 7, 8);
-        s.cycleRight(7);
+        s.rotate(7);
         is(s, 7, 8, 4, 5, 6);
-        s.cycleRight(3);
+        s.rotate(3);
         is(s, 4, 5, 6, 7, 8);
-        s.cycleRight(1);
+        s.rotate(1);
         is(s, 8, 4, 5, 6, 7);
         assertFalse(s.isEmpty());
         assertEquals(5, s.size());
-    }
-
-    @Test
-    public void testCycleRight_0args() {
+        
+        ////
+        init();
+        
         s = create().withArray(array)
                     .startingFrom(5)
                     .until(8); // 5, 6, 7
         
         is(s, 5, 6, 7);
-        s.cycleRight();
+        s.rotate(1);
         is(s, 7, 5, 6);
-        s.cycleRight();
+        s.rotate(1);
         is(s, 6, 7, 5);
-        s.cycleRight();
+        s.rotate(1);
         is(s, 5, 6, 7);
-        s.cycleRight();
+        s.rotate(1);
         is(s, 7, 5, 6);
-        s.contractBack(10);
+        s.shiftTail(-10);
         is(s);
-        s.cycleRight();
+        s.rotate(1);
         is(s);
         assertTrue(s.isEmpty());
     }
-    
+
     public void is(final Slice s, final Integer... ints) {
         int index = 0;
         final Iterator<Integer> it = s.iterator();
