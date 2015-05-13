@@ -343,8 +343,7 @@ public class Slice<E> implements Iterable<E> {
      * @param array the array.
      * @param index the index.
      */
-    private static <E> void checkIndexForArray(final E[] array,
-                                               final int index) {
+    private static <E> void checkIndexForArray(E[] array, int index) {
         if (index < 0) {
             throw new IllegalArgumentException(
                     "The index (" + index + ") may not be negative.");
@@ -362,7 +361,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param index the index to check.
      */
-    private void checkAccessIndex(final int index) {
+    private void checkAccessIndex(int index) {
         final int size = size();
 
         if (size == 0) {
@@ -382,7 +381,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param amount the expansion length.
      */
-    private void expandHead(final int amount) {
+    private void expandHead(int amount) {
         checkNotNegative(amount);
         final int actualAmount = Math.min(amount, array.length - size());
         fromIndex -= actualAmount;
@@ -399,7 +398,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param amount the contraction length.
      */
-    private void contractHead(final int amount) {
+    private void contractHead(int amount) {
         checkNotNegative(amount);
         final int actualAmount = Math.min(amount, size());
         fromIndex += actualAmount;
@@ -415,7 +414,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param amount the expansion length.
      */
-    private void expandTail(final int amount) {
+    private void expandTail(int amount) {
         checkNotNegative(amount);
         size += Math.min(amount, array.length - size());
     }
@@ -425,7 +424,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param amount the contraction length.
      */
-    private void contractTail(final int amount) {
+    private void contractTail(int amount) {
         checkNotNegative(amount);
         size -= Math.min(amount, size());
     }
@@ -458,7 +457,7 @@ public class Slice<E> implements Iterable<E> {
      * 
      * @param steps the amount of steps to move.
      */
-    private void moveRight(final int steps) {
+    private void moveRight(int steps) {
         checkNotNegative(steps);
         
         if (array.length == 0) {
