@@ -19,17 +19,17 @@ public class Slice<E> implements Iterable<E> {
      * The actual array being sliced.
      */
     private final E[] array;
-    
+
     /**
      * The starting index of this slice within <code>array</code>.
      */
     private int fromIndex;
-    
+
     /**
      * The size of this slice. 
      */
     private int size;
-    
+
     /**
      * Constructs a slice representing the entire array.
      * 
@@ -38,7 +38,7 @@ public class Slice<E> implements Iterable<E> {
     public Slice(final E[] array) {
         this(array, 0, array.length);
     }
-    
+
     /**
      * Constructs a slice representing everything starting at index
      * <code>fromIndex</code>.
@@ -49,7 +49,7 @@ public class Slice<E> implements Iterable<E> {
     public Slice(final E[] array, final int fromIndex) {
         this(array, fromIndex, array.length);
     }
-    
+
     /**
      * Constructs a new slice for <code>array</code> starting at 
      * <code>fromIndex</code> and ending at <code>toIndex - 1</code>.
@@ -71,7 +71,7 @@ public class Slice<E> implements Iterable<E> {
                     toIndex - fromIndex :
                     array.length - fromIndex + toIndex;
     }
-    
+
     /**
      * Returns <code>true</code> if this slice is empty.
      * 
@@ -80,7 +80,7 @@ public class Slice<E> implements Iterable<E> {
     public boolean isEmpty() {
         return size == 0;
     }
-    
+
     /**
      * Returns the current size of this slice.
      * 
@@ -89,7 +89,7 @@ public class Slice<E> implements Iterable<E> {
     public int size() {
         return size;
     }
-    
+
     /**
      * Accesses an element. The indices wrap around to the beginning of the 
      * underlying array.
@@ -101,7 +101,7 @@ public class Slice<E> implements Iterable<E> {
         checkIndex(index);
         return array[(fromIndex + index) % array.length];
     }
-    
+
     /**
      * Sets a new value at slice index <code>index</code>.
      * 
@@ -112,7 +112,7 @@ public class Slice<E> implements Iterable<E> {
         checkIndex(index);
         array[(fromIndex + index) % array.length] = value;
     }
-    
+
     /**
      * Moves this slice <code>steps</code> to the right. If the head of this
      * slice, while moving to the left, leaves the beginning of the underlying
@@ -124,21 +124,21 @@ public class Slice<E> implements Iterable<E> {
         if (array.length == 0) {
             return;
         }
-        
+
         fromIndex -= steps % array.length;
-        
+
         if (fromIndex < 0) {
             fromIndex += array.length;
         }
     }
-    
+
     /**
      * Moves this slice one step to the left.
      */
     public void moveLeft() {
         moveLeft(1);
     }
-    
+
     /**
      * Moves this slice <code>steps</code> amount of steps to the right. If the 
      * tail of this slice, while moving to the right, leaves the tail of the
@@ -150,21 +150,21 @@ public class Slice<E> implements Iterable<E> {
         if (array.length == 0) {
             return;
         }
-        
+
         fromIndex += steps % array.length;
-        
+
         if (fromIndex >= array.length) {
             fromIndex -= array.length;
         }
     }
-    
+
     /**
      * Moves this slice one step to the right.
      */
     public void moveRight() {
         moveRight(1);
     }
-    
+
     /**
      * Expands the front of this slice by at <code>amount</code> array
      * components. This slice may "cycle" the same way as at motion to the left
@@ -177,19 +177,19 @@ public class Slice<E> implements Iterable<E> {
         final int actualAmount = Math.min(amount, array.length - size());
         fromIndex -= actualAmount;
         size += actualAmount;
-        
+
         if (fromIndex < 0) {
             fromIndex += array.length;
         }
     }
-    
+
     /**
      * Expands the front of this slice by one array component.
      */
     public void expandFront() {
         expandFront(1);
     }
-    
+
     /**
      * Contracts the front of this slice by at <code>amount</code> array
      * components.
@@ -201,19 +201,19 @@ public class Slice<E> implements Iterable<E> {
         final int actualAmount = Math.min(amount, size());
         fromIndex += actualAmount;
         size -= actualAmount;
-        
+
         if (fromIndex >= array.length) {
             fromIndex -= array.length;
         }
     }
-    
+
     /**
      * Contracts the front of this slice by one array component.
      */
     public void contractFront() {
         contractFront(1);
     }
-    
+
     /**
      * Expands the back of this slice by at <code>amount</code> array 
      * components.
@@ -224,14 +224,14 @@ public class Slice<E> implements Iterable<E> {
         checkNotNegative(amount);
         size += Math.min(amount, array.length - size());
     }
-    
+
     /**
      * Expands the back of this slice by one array component.
      */
     public void expandBack() {
         expandBack(1);
     }
-    
+
     /**
      * Contracts the back of this slice by <code>amount</code> array components.
      * 
@@ -241,14 +241,14 @@ public class Slice<E> implements Iterable<E> {
         checkNotNegative(amount);
         size -= Math.min(amount, size());
     }
-    
+
     /**
      * Contracts the back of this slice by one array component.
      */
     public void contractBack() {
         contractBack(1);
     }
-    
+
     /**
      * Reverses the array range covered by this slice.
      */
@@ -259,7 +259,7 @@ public class Slice<E> implements Iterable<E> {
             set(r, tmp);
         }
     }
-    
+
     /**
      * Cycles the array range covered by this slice <code>steps</code> steps to
      * the left.
@@ -271,27 +271,27 @@ public class Slice<E> implements Iterable<E> {
             // Trivially cycled.
             return;
         }
-        
+
         final int actualSteps = steps % size();
-        
+
         if (actualSteps == 0) {
             return;
         }
-        
+
         if (actualSteps <= size() - actualSteps) {
             cycleImplLeft(actualSteps);
         } else {
             cycleImplRight(size() - actualSteps);
         }
     }
-    
+
     /**
      * Cycles the array range covered by this slice one step to the leftt.
      */
     public void cycleLeft() {
         cycleLeft(1);
     }
-    
+
     /**
      * Cycles the array range covered by this slice <code>steps</code> steps to
      * the right.
@@ -303,27 +303,27 @@ public class Slice<E> implements Iterable<E> {
             // Trivially cycled.
             return;
         }
-        
+
         final int actualSteps = steps % size();
-        
+
         if (actualSteps == 0) {
             return;
         }
-        
+
         if (actualSteps <= size() - actualSteps) {
             cycleImplRight(actualSteps);
         } else {
             cycleImplLeft(size() - actualSteps);
         }
     }
-    
+
     /**
      * Cycles the array range covered by this slice one step to the right.
      */
     public void cycleRight() {
         cycleRight(1);
     }
-    
+
     /**
      * Returns the iterator over this slice.
      * 
@@ -333,7 +333,7 @@ public class Slice<E> implements Iterable<E> {
     public Iterator<E> iterator() {
         return new SliceIterator();
     }
-    
+
     /**
      * Returns the textual representation of this slice.
      * 
@@ -343,18 +343,18 @@ public class Slice<E> implements Iterable<E> {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         int left = size();
-        
+
         for (final E element : this) {
             sb.append(element);
-            
+
             if (--left > 0) {
                 sb.append(' ');
             }
         }
-        
+
         return sb.toString();
     }
-    
+
     /**
      * Implements the rotation of a slice to the left.
      * 
@@ -362,25 +362,25 @@ public class Slice<E> implements Iterable<E> {
      */
     private void cycleImplLeft(final int steps) {
         final Object[] buffer = new Object[steps];
-        
+
         int index = 0;
-        
+
         // Load the buffer.
         for (; index < steps; ++index) {
             buffer[index] = get(index);
         }
-        
+
         for (int j = 0; index < size; ++index, ++j) {
             set(j, get(index));
         }
-        
+
         index -= steps;
-        
+
         for (int j = 0; index < size; ++index, ++j) {
             set(index, (E) buffer[j]);
         }
     }
-    
+
     /**
      * Implements the rotation of a slice to the right.
      * 
@@ -388,20 +388,20 @@ public class Slice<E> implements Iterable<E> {
      */
     private void cycleImplRight(final int steps) {
         final Object[] buffer = new Object[steps];
-        
+
         for (int i = 0, j = size - steps; i < steps; ++i, ++j) {
             buffer[i] = get(j);
         }
-        
+
         for (int i = size - steps - 1; i >= 0; --i) {
             set(i + steps, get(i));
         }
-        
+
         for (int i = 0; i < buffer.length; ++i) {
             set(i, (E) buffer[i]);
         }
     }
-    
+
     /**
      * Checks that the input array is not <code>null</code>.
      * 
@@ -413,7 +413,7 @@ public class Slice<E> implements Iterable<E> {
             throw new NullPointerException("Input array is null.");
         }
     }
-    
+
     /**
      * Checks that <code>index</code> is legal for an <code>array</code>.
      * 
@@ -427,14 +427,14 @@ public class Slice<E> implements Iterable<E> {
             throw new IllegalArgumentException(
                     "The index (" + index + ") may not be negative.");
         }
-        
+
         if (index > array.length) {
             throw new IllegalArgumentException(
                     "The index (" + index + ") is too large. Should be at " +
                     "most " + array.length);
         }
     }
-    
+
     /**
      * Checks the access indices.
      * 
@@ -442,18 +442,18 @@ public class Slice<E> implements Iterable<E> {
      */
     private void checkIndex(final int index) {
         final int size = size();
-        
+
         if (size == 0) {
             throw new NoSuchElementException("Reading from an empty slice.");
         }
-        
+
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException(
                     "The input index is invalid: " + index + ". Should be " +
                     "in range [0, " + (size - 1) + "].");
         }
     }
-    
+
     /**
      * Checks that <code>number</code> is not negative.
      * 
@@ -465,7 +465,7 @@ public class Slice<E> implements Iterable<E> {
                     "The input number is negative: " + number);
         }
     }
-    
+
     /**
      * This class implements an iterator over this slice's array components.
      */
@@ -475,19 +475,19 @@ public class Slice<E> implements Iterable<E> {
          * The index of the next slice component to return.
          */
         private int index;
-        
+
         /**
          * The number of components yet to iterate.
          */
         private int toIterateLeft;
-        
+
         /**
          * Constructs a new slice iterator.
          */
         SliceIterator() {
             toIterateLeft = Slice.this.size;
         }
-        
+
         /**
          * Returns <code>true</code> if there is components yet to iterate.
          * 
@@ -508,12 +508,12 @@ public class Slice<E> implements Iterable<E> {
             if (toIterateLeft == 0) {
                 throw new NoSuchElementException("Iterator exceeded.");
             }
-            
+
             --toIterateLeft;
             return Slice.this.get(index++);
         }
     }
-    
+
     /**
      * The entry point into a program.
 
@@ -521,25 +521,25 @@ public class Slice<E> implements Iterable<E> {
      */
     public static void main(final String... args) {
         final Character[] array = new Character[10];
-        
+
         for (char c = '0'; c <= '9'; ++c) {
             array[c - '0'] = c;
         }
-        
+
         final Slice<Character> slice = new Slice<>(array);
         final Scanner scanner = new Scanner(System.in);
-        
+
         System.out.println(slice);
-        
+
         while (scanner.hasNext()) {
-            
+
             final String line = scanner.nextLine().trim().toLowerCase();
             final String[] parts = line.split("\\s+");
-            
+
             if (parts.length == 0) {
                 continue;
             }
-            
+
             switch (parts[0]) {
                 case "left":
                     if (parts.length > 1) {
@@ -548,9 +548,9 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.moveLeft();
                     }
-                    
+
                 break;
-                    
+
                 case "right":
                     if (parts.length > 1) {
                         int steps = Integer.parseInt(parts[1]);
@@ -558,9 +558,9 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.moveRight();
                     }
-                
+
                 break;
-                    
+
                 case "exfront":
                     if (parts.length > 1) {
                         int steps = Integer.parseInt(parts[1]);
@@ -568,9 +568,9 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.expandFront();
                     }
-                
+
                 break;
-                    
+
                 case "exback":
                     if (parts.length > 1) {
                         int steps = Integer.parseInt(parts[1]);
@@ -578,9 +578,9 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.expandBack();
                     }
-                
+
                 break;
-                    
+
                 case "confront":
                     if (parts.length > 1) {
                         int steps = Integer.parseInt(parts[1]);
@@ -588,9 +588,9 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.contractFront();
                     }
-                
+
                 break;
-                    
+
                 case "conback":
                     if (parts.length > 1) {
                         int steps = Integer.parseInt(parts[1]);
@@ -598,9 +598,9 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.contractBack();
                     }
-                
+
                 break;
-                    
+
                 case "lcycle":
                     if (parts.length > 1) {
                         int steps = Integer.parseInt(parts[1]);
@@ -608,9 +608,9 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.cycleLeft();
                     }
-                    
+
                 break;
-                    
+
                 case "rcycle":
                     if (parts.length > 1) {
                         int steps = Integer.parseInt(parts[1]);
@@ -618,25 +618,30 @@ public class Slice<E> implements Iterable<E> {
                     } else {
                         slice.cycleRight();
                     }
-                    
+
                 break;
-                    
+
                 case "rev":
                     slice.reverse();
                     break;
-                    
+
                 case "help":
                     printHelp();
                     break;
-                    
+
                 case "quit":
                     System.exit(0);
+                    break; // Just be sure for maintenance.
+                    
+                default:
+                    System.out.println("Unknown command \"" + line + "\"");
+                    break;
             }
-            
+
             System.out.println(slice);
         }
     }
-    
+
     private static void printHelp() {
         System.out.println(
                 "----------------------------------------------\n" +
